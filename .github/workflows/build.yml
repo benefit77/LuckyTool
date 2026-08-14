@@ -27,18 +27,20 @@ jobs:
 
     steps:
       - name: 检出代码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: 安装 JDK 21
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "21"
 
       - name: 安装 Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
         with:
-          packages: "platform-tools platforms;android-37 build-tools;36.0.0"
+          # SDK 仓库里没有 platforms;android-37（API 37 的包名是 android-37.0），
+          # 平台由 AGP 在构建时按需自动安装
+          packages: "platform-tools build-tools;36.0.0"
 
       - name: 配置 Gradle
         uses: gradle/actions/setup-gradle@v4
