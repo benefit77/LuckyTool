@@ -53,6 +53,73 @@ jobs:
           set -euo pipefail
           mkdir -p keystore
 
+          # app/proguard-rules.pro 引用了 keystore/proguard-custom.txt 作为混淆字典，
+          # 该文件在 .gitignore 中，CI 上生成一份默认词表
+          cat > keystore/proguard-custom.txt <<'EOF'
+android
+system
+framework
+service
+manager
+module
+config
+control
+center
+status
+quick
+panel
+volume
+brightness
+notification
+settings
+screen
+display
+battery
+power
+storage
+network
+wifi
+bluetooth
+signal
+media
+audio
+sound
+vibrate
+gesture
+navigation
+launcher
+package
+activity
+fragment
+dialog
+window
+theme
+color
+light
+dark
+night
+update
+backup
+restore
+clear
+cache
+memory
+process
+thread
+handler
+binder
+proxy
+wrapper
+helper
+util
+core
+base
+root
+tool
+task
+work
+EOF
+
           if [[ -n "${KEYSTORE_BASE64:-}" ]]; then
             echo "${KEYSTORE_BASE64}" | base64 -d > keystore/luckytool.jks
           else
