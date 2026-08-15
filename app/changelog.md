@@ -5,6 +5,7 @@ in [TG Channel’s associated groups](https://t.me/LuckyTool)**
 
 ### 1.3.5_beta
 
+- [适配] 天气禁用跳转浏览器 v16.45.2(16045002)
 - [修复] 分身应用徽标hook异常
 - [优化] 应用分身数量限制描述
 - [添加] 强制启用飞牛云NAS选项
