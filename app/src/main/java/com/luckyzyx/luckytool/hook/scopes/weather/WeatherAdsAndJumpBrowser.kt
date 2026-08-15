@@ -30,7 +30,7 @@ class WeatherAdsAndJumpBrowser(
     @Obfuscate
     object HookWeatherAdsAndJump : YukiBaseHooker() {
         private const val weatherWrapper = "com.oplus.weather.main.model.WeatherWrapper"
-//        private const val BrowserCommonUtils = "com.oplus.weather.plugin.webview.BrowserCommonUtils"
+        private const val BrowserCommonUtils = "com.oplus.weather.plugin.webview.BrowserCommonUtils"
         override fun onHook() {
             val removeAds =
                 preferences(ModulePrefs).getBoolean("remove_weather_some_page_bottom_ads", false)
@@ -103,9 +103,9 @@ class WeatherAdsAndJumpBrowser(
             "com.oplus.weather.utils.SecondaryPageUtil".toClassOrNull()?.resolve()?.apply {
                 firstMethod { name = "newLink" }.hook {
                     after {
-                        if (removeAds) result = formatWeatherUrl(
-                            result<String>() ?: return@after
-                        )
+                        if (!removeAds) return@after
+                        val url = runCatching { result<String>() }.getOrNull() ?: return@after
+                        result = formatWeatherUrl(url)
                     }
                 }
                 method {
@@ -114,8 +114,43 @@ class WeatherAdsAndJumpBrowser(
                     returnType { it == classOf<Intent>() || it == classOf<Any>() }
                 }.hookAll {
                     after {
-                        val intent = result<Intent>() ?: return@after
+                        val intent = runCatching { result<Intent>() }.getOrNull() ?: return@after
                         intent.data = formatWeatherUrl(intent.data.toString()).toUri()
+                    }
+                }
+
+                //Source SecondaryPageUtil startJumpToBrowser v16.45.2+ 协程化跳转入口
+                //主界面 15 日天气/生活指数/预警/降雨等 -> startJumpToBrowser(Context,String,boolean)
+                method {
+                    name = "startJumpToBrowser"
+                    parameterCount(3)
+                    parameters(Context::class, String::class, Boolean::class)
+                }.hookAll {
+                    before {
+                        if (!disableJump) return@before
+                        val context = arg(0).get<Context>() ?: return@before
+                        val url = arg(1).get<String>() ?: return@before
+                        //CCTV
+                        if (url.isBlank() || url.startsWith("heytapbrowser://")) return@before
+                        val newUrl = if (removeAds) formatWeatherUrl(url) else url
+                        startWebActivity(BrowserCommonUtils.toClass(), context, newUrl, "")
+                        result = null
+                    }
+                }
+                //推送通知/次级中转页 -> startJumpToBrowser(Context,String,boolean,...)
+                method {
+                    name = "startJumpToBrowser"
+                    parameterCount(10)
+                }.hookAll {
+                    before {
+                        if (!disableJump) return@before
+                        val context = arg(0).get<Context>() ?: return@before
+                        val url = arg(1).get<String>() ?: return@before
+                        //CCTV
+                        if (url.isBlank() || url.startsWith("heytapbrowser://")) return@before
+                        val newUrl = if (removeAds) formatWeatherUrl(url) else url
+                        startWebActivity(BrowserCommonUtils.toClass(), context, newUrl, "")
+                        result = null
                     }
                 }
             }
@@ -147,6 +182,38 @@ class WeatherAdsAndJumpBrowser(
                     }
                 }
             }
+
+            //Source WeatherQueryActivity -> 全局搜索/快捷入口直达跳转 v16.45.2+
+            "com.oplus.weather.push.WeatherQueryActivity".toClassOrNull()?.resolve()?.apply {
+                method {
+                    name = "startActivity"
+                    parameters(Intent::class)
+                    superclass()
+                }.hookAll {
+                    before {
+                        if (!disableJump) return@before
+                        val intent = arg(0).get<Intent>() ?: return@before
+                        val targetPackage = intent.`package` ?: intent.component?.packageName
+                        val isBrowserIntent =
+                            targetPackage in browserPackages ||
+                                intent.action == "com.heytap.browser.action.DETAIL_PAGE"
+                        if (!isBrowserIntent) return@before
+                        val url = intent.dataString ?: return@before
+                        //CCTV
+                        if (url.startsWith("heytapbrowser://")) return@before
+                        val context = instance as? Context ?: return@before
+                        arg(0).set(
+                            Intent(context, "com.oplus.weather.plugin.webview.WeatherWebActivity".toClass()).apply {
+                                addFlags(Intent.FLAG_ACTIVITY_SINGLE_TOP)
+                                intent.extras?.let { putExtras(it) }
+                                putExtra("intent_params_url", url)
+                                putExtra("intent_params_isFirst", true)
+                                putExtra("intent_params_statistics", "")
+                            }
+                        )
+                    }
+                }
+            }
         }
 
         private fun YukiHookCreator.ClassicMemberHooker.hookBefore(
@@ -154,7 +221,6 @@ class WeatherAdsAndJumpBrowser(
         ) {
             before {
                 val context = (args.find { it is Context } ?: return@before) as Context
-                val type = arg(args.indexOfFirst { it is Int }).get<Int>() ?: 0
 
 //                var url = arg(2).get<String>() ?: ""
 //                val statisticsTag = arg(3).get<String>() ?: ""
@@ -173,7 +239,7 @@ class WeatherAdsAndJumpBrowser(
                 if (removeAds) arg(urlIndex).set(formatWeatherUrl(url))
                 if (disableJump) {
                     val newUrl = arg(urlIndex).get<String>() ?: ""
-                    startWebActivity(type, context, newUrl, statisticsTag)
+                    startWebActivity(BrowserCommonUtils.toClass(), context, newUrl, statisticsTag)
                     result = null
                 }
             }
@@ -306,6 +372,10 @@ class WeatherAdsAndJumpBrowser(
     }
 
     companion object {
+        val browserPackages = setOf(
+            "com.heytap.browser", "com.android.browser", "com.coloros.browser"
+        )
+
         private fun getWeatherIntent(
             action: String, browser: Int, url: String, statisticsTag: String
         ): Intent {
