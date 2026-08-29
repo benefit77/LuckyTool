@@ -32,7 +32,8 @@ object FingerPrintIconAnim : YukiBaseHooker() {
             "com.oplus.systemui.biometrics.finger.udfps.OnScreenFingerprintUiMach", //C14
             "com.oplus.systemui.biometrics.finger.udfps.OnScreenFingerprintUiMech"  //C15
         ).toClass().resolve().apply {
-            firstMethod { name = "loadAnimDrawables" }.hook {
+            optional()
+            firstMethod { name = "loadAnimDrawables"; superclass() }.hook {
                 if (removeMode == "3") intercept()
                 else after {
                     when (removeMode) {
@@ -45,13 +46,13 @@ object FingerPrintIconAnim : YukiBaseHooker() {
                     }
                 }
             }
-            firstMethodOrNull { name = "startFadeInAnimation" }?.hook {
+            firstMethodOrNull { name = "startFadeInAnimation"; superclass() }?.hook {
                 if (isReplaceIcon) before {
                     instance.setCustomDrawable(iconPath, false)
                     resultNull()
                 } else if (removeMode == "1" || removeMode == "3") intercept()
             }
-            firstMethodOrNull { name = "startFadeOutAnimation" }?.hook {
+            firstMethodOrNull { name = "startFadeOutAnimation"; superclass() }?.hook {
                 if (isReplaceIcon) intercept()
                 else if (removeMode == "1" || removeMode == "3") intercept()
             }

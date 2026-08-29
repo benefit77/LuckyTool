@@ -123,7 +123,8 @@ object LockScreenClock : YukiBaseHooker() {
                 "com.oplusos.systemui.keyguard.clock.SingleClockView", //C13
                 "com.oplus.systemui.shared.clocks.SingleClockView" //C14
             ).toClass().resolve().apply {
-                firstMethod { name = "onFinishInflate" }.hook {
+                optional()
+                firstMethod { name = "onFinishInflate"; superclass() }.hook {
                     after {
                         if (!isCenter && !userTypeface) return@after
                         instance<ViewGroup>().apply {
@@ -140,19 +141,25 @@ object LockScreenClock : YukiBaseHooker() {
                         }
                     }
                 }
-                (firstMethodOrNull { name = "updateKeyguardLandClock" }
-                    ?: firstMethod { name { it.contains("updateKeyguardLandClock") } }).hook {
+                (firstMethodOrNull { name = "updateKeyguardLandClock"; superclass() }
+                    ?: firstMethod {
+                        name { it.contains("updateKeyguardLandClock") }
+                        superclass()
+                    }).hook {
                     after {
                         if (isCenter) instance<ViewGroup>().setPadding(0, 20.dp, 0, 0)
                     }
                 }
-                firstMethod { name = "updateTime" }.hook {
+                firstMethod { name = "updateTime"; superclass() }.hook {
                     after {
                         if (redMode == "0") return@after
                         val mTimeHour =
-                            firstField { name = "mTimeHour" }.of(instance).get<TextView>()
+                            firstField { name = "mTimeHour"; superclass() }.of(instance).get<TextView>()
                                 ?: return@after
-                        val mHour = firstField { name = "mHour" }.of(instance).get<String>()
+                        val mHour = firstField {
+                            name = "mHour"
+                            superclass()
+                        }.of(instance).get<String>()
                         if (mHour.isNullOrBlank()) return@after
                         mTimeHour.setClockRed(mHour, redMode)
                     }
@@ -163,7 +170,8 @@ object LockScreenClock : YukiBaseHooker() {
                 "com.oplusos.systemui.keyguard.clock.DualClockView", //C13
                 "com.oplus.systemui.shared.clocks.DualClockView" //C14
             ).toClass().resolve().apply {
-                firstMethod { name = "onFinishInflate" }.hook {
+                optional()
+                firstMethod { name = "onFinishInflate"; superclass() }.hook {
                     after {
                         if (!userTypeface) return@after
                         instance<ViewGroup>().allViews.filter { it is TextView }

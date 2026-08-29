@@ -39,8 +39,9 @@ object MobileDataIconRelated : YukiBaseHooker() {
             //Source OplusMobileIconViewModel
             "com.oplus.systemui.statusbar.pipeline.mobile.ui.viewmodel.OplusMobileIconViewModel".toClass()
                 .resolve().apply {
+                    optional()
                     if (removeInout) {
-                        firstMethod { name = "getMobileActivityResId" }.hook {
+                        firstMethod { name = "getMobileActivityResId"; superclass() }.hook {
                             before {
                                 result = FlowUtils(appClassLoader).let {
                                     val mutableStateFlow = it.MutableStateFlow(0) ?: return@before
@@ -50,7 +51,7 @@ object MobileDataIconRelated : YukiBaseHooker() {
                         }
                     }
                     if (removeType) {
-                        firstMethod { name = "getNetworkTypeIcon" }.hook {
+                        firstMethod { name = "getNetworkTypeIcon"; superclass() }.hook {
                             before {
                                 result = FlowUtils(appClassLoader).let {
                                     val mutableStateFlow =
@@ -64,6 +65,7 @@ object MobileDataIconRelated : YukiBaseHooker() {
                         firstMethod {
                             name = "isVisible"
                             returnType = "kotlinx.coroutines.flow.StateFlow"
+                            superclass()
                         }.hook {
                             after {
                                 if (result == null) return@after
@@ -73,7 +75,10 @@ object MobileDataIconRelated : YukiBaseHooker() {
                                 if (!originalValue) return@after
 
                                 val subId =
-                                    firstField { name = "subscriptionId" }.of(instance).get<Int>()
+                                    firstField {
+                                        name = "subscriptionId"
+                                        superclass()
+                                    }.of(instance).get<Int>()
                                 val localSubId = SubscriptionManager.getDefaultDataSubscriptionId()
                                 result = FlowUtils(appClassLoader).let {
                                     val mutableStateFlow = it.MutableStateFlow(subId == localSubId)
@@ -88,10 +93,12 @@ object MobileDataIconRelated : YukiBaseHooker() {
             //Source MobileIconViewModel
             "com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.MobileIconViewModel".toClass()
                 .resolve().apply {
+                    optional()
                     if (hideNonNetwork) {
                         firstMethod {
                             name = "isVisible"
                             returnType = "kotlinx.coroutines.flow.StateFlow"
+                            superclass()
                         }.hook {
                             after {
                                 if (result == null) return@after
@@ -101,7 +108,10 @@ object MobileDataIconRelated : YukiBaseHooker() {
                                 if (!originalValue) return@after
 
                                 val subId =
-                                    firstField { name = "subscriptionId" }.of(instance).get<Int>()
+                                    firstField {
+                                        name = "subscriptionId"
+                                        superclass()
+                                    }.of(instance).get<Int>()
                                 val localSubId = SubscriptionManager.getDefaultDataSubscriptionId()
                                 result = FlowUtils(appClassLoader).let {
                                     val mutableStateFlow = it.MutableStateFlow(subId == localSubId)
@@ -116,10 +126,12 @@ object MobileDataIconRelated : YukiBaseHooker() {
             //Source LocationBasedMobileViewModel
             "com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel.LocationBasedMobileViewModel".toClass()
                 .resolve().apply {
+                    optional()
                     if (hideNonNetwork) {
                         firstMethod {
                             name = "isVisible"
                             returnType = "kotlinx.coroutines.flow.StateFlow"
+                            superclass()
                         }.hook {
                             after {
                                 if (result == null) return@after
@@ -129,7 +141,10 @@ object MobileDataIconRelated : YukiBaseHooker() {
                                 if (!originalValue) return@after
 
                                 val subId =
-                                    firstField { name = "subscriptionId" }.of(instance).get<Int>()
+                                    firstField {
+                                        name = "subscriptionId"
+                                        superclass()
+                                    }.of(instance).get<Int>()
                                 val localSubId = SubscriptionManager.getDefaultDataSubscriptionId()
                                 result = FlowUtils(appClassLoader).let {
                                     val mutableStateFlow = it.MutableStateFlow(subId == localSubId)
@@ -144,12 +159,15 @@ object MobileDataIconRelated : YukiBaseHooker() {
             //Source OplusStatusBarSignalPolicy
             "com.oplus.systemui.statusbar.phone.signal.OplusStatusBarSignalPolicy".toClass()
                 .resolve().apply {
+                    optional()
                     (firstMethodOrNull {
                         name = "updateSlotIconVisibility"
                         parameterCount { it in 3..4 }
+                        superclass()
                     } ?: firstMethod {
                         name { it.contains("updateSlotIconVisibility") }
                         parameterCount { it in 3..4 }
+                        superclass()
                     }).hook {
                         before {
                             if (!hideNoSS) return@before
@@ -179,7 +197,8 @@ object MobileDataIconRelated : YukiBaseHooker() {
                 "com.oplusos.systemui.statusbar.OplusStatusBarMobileView", //C12.1
                 "com.oplus.systemui.statusbar.phone.signal.OplusStatusBarMobileViewExImpl" //C13
             ).toClass().resolve().apply {
-                firstMethod { name = "initViewState" }.hook {
+                optional()
+                firstMethod { name = "initViewState"; superclass() }.hook {
                     after {
                         if (hideNonNetwork) {
                             val state = args().first().any()
@@ -228,18 +247,25 @@ object MobileDataIconRelated : YukiBaseHooker() {
                 "com.oplusos.systemui.ext.StatusBarSignalPolicyExt", //C12.1
                 "com.oplus.systemui.statusbar.phone.signal.OplusStatusBarSignalPolicyExImpl" //C13
             ).toClass().resolve().apply {
-                firstMethod { name = "setNoSims"; parameterCount = 3 }.hook {
+                optional()
+                firstMethod { name = "setNoSims"; parameterCount = 3; superclass() }.hook {
                     after {
                         if (!hideNoSS) return@after
-                        val iconController = firstMethodOrNull { name = "getIconController" }
+                        val iconController = firstMethodOrNull {
+                            name = "getIconController"
+                            superclass()
+                        }
                             ?.of(instance)?.invoke() ?: firstField { name = "iconController" }
                             .of(instance).get() ?: return@after
                         val slotNoSim =
-                            firstField { name = "slotNoSim" }.of(instance).get<String>()
+                            firstField {
+                                name = "slotNoSim"
+                                superclass()
+                            }.of(instance).get<String>()
                         iconController.asResolver().apply {
                             firstMethod {
                                 name = "setIconVisibility"
-                                firstMethodOrNull { name = "setIconVisibility" } ?: superclass()
+                                superclass()
                             }.invoke(slotNoSim, false)
                         }
                     }
@@ -261,7 +287,8 @@ object MobileDataIconRelated : YukiBaseHooker() {
 
             //Source StatusBarMobileView
             "com.android.systemui.statusbar.StatusBarMobileView".toClass().resolve().apply {
-                firstMethod { name = "initViewState" }.hook {
+                optional()
+                firstMethod { name = "initViewState"; superclass() }.hook {
                     after {
                         if (hideNonNetwork) {
                             val state = firstField { name = "mState" }.of(instance).get()
@@ -279,7 +306,7 @@ object MobileDataIconRelated : YukiBaseHooker() {
                             .get<View>()?.isVisible = false
                     }
                 }
-                firstMethod { name = "updateState" }.hook {
+                firstMethod { name = "updateState"; superclass() }.hook {
                     after {
                         if (hideNonNetwork) {
                             val state = firstField { name = "mState" }.of(instance).get()
@@ -301,7 +328,8 @@ object MobileDataIconRelated : YukiBaseHooker() {
 
             //Source SignalClusterView
             "com.oplusos.systemui.statusbar.widget.SignalClusterView".toClass().resolve().apply {
-                firstMethod { name = "updateNoSimView" }.hook {
+                optional()
+                firstMethod { name = "updateNoSimView"; superclass() }.hook {
                     after {
                         if (!hideNoSS) return@after
                         val mNoSims = firstField { name = "mNoSims" }.of(instance).get<View>()

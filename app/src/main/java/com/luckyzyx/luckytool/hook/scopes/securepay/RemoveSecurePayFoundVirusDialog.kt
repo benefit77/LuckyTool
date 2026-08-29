@@ -36,18 +36,22 @@ object RemoveSecurePayFoundVirusDialog : YukiBaseHooker() {
                         }
                     }
                 }
-            }.apply {
-                checkDataList("RemoveSecurePayFoundVirusDialog")
-                single().name.toClass().resolve().apply {
-                    firstMethod {
+            }.let {
+                if (it.isEmpty()) return@create
+                it.checkDataList("RemoveSecurePayFoundVirusDialog")
+                it.single().name.toClass().resolve().apply {
+                    optional()
+                    firstMethodOrNull {
                         parameters(VagueType, String::class)
                         returnType = Void.TYPE
-                    }.hook {
+                        superclass()
+                    }?.hook {
                         intercept()
                     }
                     method {
                         emptyParameters()
                         returnType = Void.TYPE
+                        superclass()
                     }.hookAll {
                         intercept()
                     }

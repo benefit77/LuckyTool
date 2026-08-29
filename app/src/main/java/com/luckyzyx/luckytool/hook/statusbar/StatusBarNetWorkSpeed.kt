@@ -44,13 +44,17 @@ object StatusBarNetWorkSpeed : YukiBaseHooker() {
                 "com.oplus.systemui.statusbar.phone.netspeed.OplusNetworkSpeedControllExImpl", //C13
                 "com.oplus.systemui.statusbar.phone.netspeed.OplusNetworkSpeedControllerExImpl" //C14 C15
             ).toClass().resolve().apply {
-                val bgHandler = firstField { name = "bgHandler" }
-                val uiHandler = firstField { name = "uiHandler" }
-                val lastTime = firstField { name = "lastTime" }
-                val lastTotalBytes = firstField { name = "lastTotalBytes" }
+                optional()
+                val bgHandler = firstField { name = "bgHandler"; superclass() }
+                val uiHandler = firstField { name = "uiHandler"; superclass() }
+                val lastTime = firstField { name = "lastTime"; superclass() }
+                val lastTotalBytes = firstField { name = "lastTotalBytes"; superclass() }
 
-                (firstMethodOrNull { name = "updateNetworkSpeed" }
-                    ?: firstMethod { name { it.contains("updateNetworkSpeed") } }).hook {
+                (firstMethodOrNull { name = "updateNetworkSpeed"; superclass() }
+                    ?: firstMethod {
+                        name { it.contains("updateNetworkSpeed") }
+                        superclass()
+                    }).hook {
                     before {
                         if (!networkSpeed) return@before
                         val instance = instanceOrNull ?: args().first().any()
@@ -59,19 +63,19 @@ object StatusBarNetWorkSpeed : YukiBaseHooker() {
                         obtain.what = 100000
                         var finalTotal = 0L
 
-                        val isConnected = firstField { name = "isConnected" }.of(instance)
+                        val isConnected = firstField { name = "isConnected"; superclass() }.of(instance)
                             .get<Boolean>() ?: false
-                        val isSwitchOn = firstField { name = "isSwitchOn" }.of(instance)
+                        val isSwitchOn = firstField { name = "isSwitchOn"; superclass() }.of(instance)
                             .get<Boolean>() ?: false
 
                         if (isConnected && isSwitchOn) {
                             val currentTimeMillis = System.currentTimeMillis()
-                            var totalByte = firstMethod { name = "getTotalByte" }.of(instance)
+                            var totalByte = firstMethod { name = "getTotalByte"; superclass() }.of(instance)
                                 .invoke<Long>() ?: 0
                             if (totalByte <= 0) {
                                 lastTime.copy().of(instance).set(0L)
                                 lastTotalBytes.copy().of(instance).set(0L)
-                                totalByte = firstMethod { name = "getTotalByte" }.of(instance)
+                                totalByte = firstMethod { name = "getTotalByte"; superclass() }.of(instance)
                                     .invoke<Long>() ?: 0
                             }
                             val time = lastTime.copy().of(instance).get<Long>() ?: 0
@@ -145,14 +149,15 @@ object StatusBarNetWorkSpeed : YukiBaseHooker() {
                 "com.oplusos.systemui.statusbar.widget.NetworkSpeedView",
                 "com.oplus.systemui.statusbar.phone.netspeed.widget.NetworkSpeedView" //C14 C15
             ).toClass().resolve().apply {
-                val mState = firstField { type = NetworkSpeedIconState }
-                val mBlocked = firstFieldOrNull { name = "mBlocked" }
-                val mSpeed = firstField { name = "mSpeed" }
-                val mSpeedNumber = firstField { name = "mSpeedNumber" }
-                val mSpeedUnit = firstField { name = "mSpeedUnit" }
-                val mDefaultBoldFont = firstFieldOrNull { type = Typeface::class }
+                optional()
+                val mState = firstField { type = NetworkSpeedIconState; superclass() }
+                val mBlocked = firstFieldOrNull { name = "mBlocked"; superclass() }
+                val mSpeed = firstField { name = "mSpeed"; superclass() }
+                val mSpeedNumber = firstField { name = "mSpeedNumber"; superclass() }
+                val mSpeedUnit = firstField { name = "mSpeedUnit"; superclass() }
+                val mDefaultBoldFont = firstFieldOrNull { type = Typeface::class; superclass() }
 
-                firstMethod { name = "onFinishInflate" }.hook {
+                firstMethod { name = "onFinishInflate"; superclass() }.hook {
                     after {
                         val viewGroup = instance<ViewGroup>()
                         //5.34dp

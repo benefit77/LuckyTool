@@ -14,7 +14,12 @@ object RemoveChargingCompleted : YukiBaseHooker() {
             "com.oplusos.systemui.notification.power.OplusPowerNotificationWarnings",
             "com.oplus.systemui.statusbar.notification.power.OplusPowerNotificationWarnings" //C14
         ).toClass().resolve().apply {
-            firstMethod { name = "showChargeErrorDialog";parameterCount = 1 }.hook {
+            optional()
+            firstMethod {
+                name = "showChargeErrorDialog"
+                parameterCount = 1
+                superclass()
+            }.hook {
                 before {
                     if (args().first().int() == 7) resultNull()
                 }

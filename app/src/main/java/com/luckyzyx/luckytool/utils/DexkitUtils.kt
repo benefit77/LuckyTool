@@ -21,9 +21,13 @@ object DexkitUtils {
      * @param appPath String
      * @return DexKitBridge?
      */
-    fun create(appPath: String): DexKitBridge {
-        System.loadLibrary("dexkit")
-        return DexKitBridge.create(appPath)
+    fun create(appPath: String): DexKitBridge? {
+        return try {
+            System.loadLibrary("dexkit")
+            DexKitBridge.create(appPath)
+        } catch (_: Throwable) {
+            null
+        }
     }
 
     /**
@@ -33,8 +37,7 @@ object DexkitUtils {
      */
     @SuppressLint("DuplicateCreateDexKit")
     fun create(appPath: String, result: (DexKitBridge) -> Unit) {
-        System.loadLibrary("dexkit")
-        DexKitBridge.create(appPath).use { result(it) }
+        create(appPath)?.use { result(it) }
     }
 
     /**

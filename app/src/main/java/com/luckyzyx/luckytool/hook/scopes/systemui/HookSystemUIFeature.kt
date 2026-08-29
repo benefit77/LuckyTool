@@ -62,8 +62,9 @@ class HookSystemUIFeature(val dexKitBridge: DexKitBridge) : YukiBaseHooker() {
 
             //Source FeatureOption
             "com.oplusos.systemui.common.feature.FeatureOption".toClass().resolve().apply {
+                optional()
                 //C13 C14
-                firstMethodOrNull { name = "isOplusVolumeKeyInRight" }?.hook {
+                firstMethodOrNull { name = "isOplusVolumeKeyInRight"; superclass() }?.hook {
                     before {
                         when (volumePosition) {
                             "1" -> resultFalse()
@@ -72,12 +73,12 @@ class HookSystemUIFeature(val dexKitBridge: DexKitBridge) : YukiBaseHooker() {
                     }
                 }
                 //C13
-                firstMethodOrNull { name = "isSupportShowWattage" }?.hook {
+                firstMethodOrNull { name = "isSupportShowWattage"; superclass() }?.hook {
                     if (warpCharge == "2" && showWattage) replaceToTrue()
                 }
                 //C12 C13
                 if (SDK == A13) {
-                    firstMethodOrNull { name = "isUseWarpCharge" }?.hook {
+                    firstMethodOrNull { name = "isUseWarpCharge"; superclass() }?.hook {
                         before {
                             when (warpCharge) {
                                 "1" -> resultTrue()
@@ -87,12 +88,12 @@ class HookSystemUIFeature(val dexKitBridge: DexKitBridge) : YukiBaseHooker() {
                     }
                 }
                 //C13 C14
-                firstMethodOrNull { name = "isSupportMyDevice" }?.hook {
+                firstMethodOrNull { name = "isSupportMyDevice"; superclass() }?.hook {
                     if (removeMyDevice) replaceToFalse()
                 }
                 //C12
                 if (SDK < A13) {
-                    firstMethodOrNull { name = "isSupportLandClock" }?.hook {
+                    firstMethodOrNull { name = "isSupportLandClock"; superclass() }?.hook {
                         if (forceDisplayClockStyle) replaceToTrue()
                     }
                 }
@@ -112,7 +113,8 @@ class HookSystemUIFeature(val dexKitBridge: DexKitBridge) : YukiBaseHooker() {
                 "com.oplusos.systemui.statusbar.feature.StatusBarFeatureOption", //C13
                 "com.oplusos.systemui.common.feature.StatusBarFeatureOption" //C14 C15
             ).toClass().resolve().apply {
-                firstMethod { name = "loadAppFeature" }.hook {
+                optional()
+                firstMethodOrNull { name = "loadAppFeature"; superclass() }?.hook {
                     after {
                         if (hideSignalLabels) firstField {
                             name = "isSystemUiExpSignalUi"
@@ -144,7 +146,8 @@ class HookSystemUIFeature(val dexKitBridge: DexKitBridge) : YukiBaseHooker() {
 
             //Source FlavorOneFeatureOption
             "com.oplusos.systemui.common.feature.FlavorOneFeatureOption".toClass().resolve().apply {
-                firstMethodOrNull { name = "isSupportSearch" }?.hook {
+                optional()
+                firstMethodOrNull { name = "isSupportSearch"; superclass() }?.hook {
                     before {
                         when (searchBtnMode) {
                             "1" -> resultTrue()
@@ -153,11 +156,11 @@ class HookSystemUIFeature(val dexKitBridge: DexKitBridge) : YukiBaseHooker() {
                     }
                 }
                 //C14 Realme
-                firstMethodOrNull { name = "isShowChargingWattage" }?.hook {
+                firstMethodOrNull { name = "isShowChargingWattage"; superclass() }?.hook {
                     if (showWattage) replaceToTrue()
                 }
                 //C13.1 C14.0
-                firstMethodOrNull { name = "isFlavorOneMultiMediaDevice" }?.hook {
+                firstMethodOrNull { name = "isFlavorOneMultiMediaDevice"; superclass() }?.hook {
                     if (specificVolume) replaceToTrue()
                 }
             }
@@ -176,7 +179,8 @@ class HookSystemUIFeature(val dexKitBridge: DexKitBridge) : YukiBaseHooker() {
 
             //Source VolumeFeatureOption
             "com.oplusos.systemui.common.feature.VolumeFeatureOption".toClass().resolve().apply {
-                firstMethodOrNull { name = "isVolumeBlurDisabled" }?.hook {
+                optional()
+                firstMethodOrNull { name = "isVolumeBlurDisabled"; superclass() }?.hook {
                     if (volumeBlur > -1) replaceToFalse()
                 }
             }
@@ -192,7 +196,8 @@ class HookSystemUIFeature(val dexKitBridge: DexKitBridge) : YukiBaseHooker() {
 
             //Source QSFeatureOption
             "com.oplusos.systemui.common.feature.QSFeatureOption".toClass().resolve().apply {
-                firstMethodOrNull { name = "isSupportVolumeSeekBar" }?.hook {
+                optional()
+                firstMethodOrNull { name = "isSupportVolumeSeekBar"; superclass() }?.hook {
                     when (volumnSeekbarMode) {
                         "1" -> replaceToTrue()
                         "2" -> replaceToFalse()
@@ -207,6 +212,7 @@ class HookSystemUIFeature(val dexKitBridge: DexKitBridge) : YukiBaseHooker() {
         override fun onHook() {
             //Source FeatureFlagsClassicRelease
             "com.android.systemui.flags.FeatureFlagsClassicRelease".toClass().resolve().apply {
+                optional()
                 method {
                     name = "isEnabled"
                     parameterCount = 1

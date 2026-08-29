@@ -79,23 +79,30 @@ object LockScreenChargingComponent : YukiBaseHooker() {
             }
 
             val ChargeUtilCLazz = ChargeUtil.toClass()
-            val hasShowWattage = ChargeUtilCLazz.resolve().firstMethodOrNull {
+            val chargeUtilResolver = ChargeUtilCLazz.resolve().apply { optional() }
+            val hasShowWattage = chargeUtilResolver.firstMethodOrNull {
                 name = "getShowWattage"
+                superclass()
             } != null
-            val hasTechnologyStrForFrameCharge = ChargeUtilCLazz.resolve().firstMethodOrNull {
+            val hasTechnologyStrForFrameCharge = chargeUtilResolver.firstMethodOrNull {
                 name = "getTechnologyStrForFrameCharge"
+                superclass()
             } != null
-            val hasShowWattageForFrameCharge = ChargeUtilCLazz.resolve().firstMethodOrNull {
+            val hasShowWattageForFrameCharge = chargeUtilResolver.firstMethodOrNull {
                 name = "getShowWattageForFrameCharge"
+                superclass()
             } != null
 
             val ChargeLevelAndLogoView = ChargeLevelAndLogoView.toClass()
-            val hasUpdateChargeTechImage = ChargeLevelAndLogoView.resolve().firstMethodOrNull {
+            val chargeLevelResolver = ChargeLevelAndLogoView.resolve().apply { optional() }
+            val hasUpdateChargeTechImage = chargeLevelResolver.firstMethodOrNull {
                 name = "updateChargeTechImage"
+                superclass()
             } != null
 
             //Source ChargingLevelAndLogoView
             ChargeLevelAndLogoView.resolve().apply {
+                optional()
                 firstMethod { name = "showCNChargeTechLogo" }.hook {
                     before {
                         when (textLogo) {
@@ -200,6 +207,7 @@ object LockScreenChargingComponent : YukiBaseHooker() {
 
             //Source FrameChargeLevelAndLogoView
             FrameChargeLevelAndLogoView.toClass().resolve().apply {
+                optional()
                 firstMethodOrNull { name = "shouldShowTextLogo" }?.hook {
                     before {
                         when (textLogo) {
@@ -274,6 +282,7 @@ object LockScreenChargingComponent : YukiBaseHooker() {
 
             //Source OplusChargeAnimImpl -> ChargeUtil
             ChargeUtilCLazz.resolve().apply {
+                optional()
                 firstMethod {
 //                    name = "getChargeLevelTypeFace"
 //                    name = "getSansTypeFace"
@@ -286,7 +295,11 @@ object LockScreenChargingComponent : YukiBaseHooker() {
                     }
                 }
                 if (hasShowWattage) {
-                    firstMethod { name = "getShowWattage"; parameterCount = 3 }.hook {
+                    firstMethod {
+                        name = "getShowWattage"
+                        parameterCount = 3
+                        superclass()
+                    }.hook {
                         before {
                             if (!showWattage) return@before
                             val cpaWattage = args().first().int()
@@ -306,6 +319,7 @@ object LockScreenChargingComponent : YukiBaseHooker() {
                     firstMethodOrNull {
                         name = "getShowWattageForFrameCharge"
                         parameterCount = 3
+                        superclass()
                     }?.hook {
                         before {
                             if (!showWattage) return@before
@@ -320,7 +334,10 @@ object LockScreenChargingComponent : YukiBaseHooker() {
                     }
                 }
                 if (hasTechnologyStrForFrameCharge) {
-                    firstMethod { name = "getTechnologyStrForFrameCharge" }.hook {
+                    firstMethod {
+                        name = "getTechnologyStrForFrameCharge"
+                        superclass()
+                    }.hook {
                         before {
                             if (!showRealTech) return@before
                             val oplusChargeInfo = args().last().any() ?: return@before
@@ -388,6 +405,7 @@ object LockScreenChargingComponent : YukiBaseHooker() {
 
             //Source ChargingLevelAndLogoView
             ChargeLevelAndLogoView.toClass().resolve().apply {
+                optional()
                 firstMethod { parameters(Typeface::class) }.hook {
                     after {
                         if (!userTypeface) return@after
@@ -411,6 +429,7 @@ object LockScreenChargingComponent : YukiBaseHooker() {
 
             //Source OplusChargeAnimImpl -> ChargeUtil
             ChargeUtil.toClass().resolve().apply {
+                optional()
                 firstMethod { name = "showWattage" }.hook {
                     before {
                         if (!showWattage) return@before
@@ -446,6 +465,7 @@ object LockScreenChargingComponent : YukiBaseHooker() {
 
             //Source OplusChargeAnimImpl
             OplusChargeAnimImpl.toClass().resolve().apply {
+                optional()
                 firstMethodOrNull { name = "getTechnologyStr" }?.hook {
                     before {
                         if (!showRealTech) return@before
@@ -468,6 +488,7 @@ object LockScreenChargingComponent : YukiBaseHooker() {
 
             //Source OplusChargeAnimFlavorOneImpl
             OplusChargeAnimFlavorOneImpl.toClassOrNull()?.resolve()?.apply {
+                optional()
                 firstMethod { name = "getTechnologyStr" }.hook {
                     before {
                         if (!showRealTech) return@before
@@ -490,6 +511,7 @@ object LockScreenChargingComponent : YukiBaseHooker() {
 
             //Source ChargeLevelAndLogoFlavorOneView
             ChargeLevelAndLogoFlavorOneView.toClassOrNull()?.resolve()?.apply {
+                optional()
                 firstMethod { parameters(Typeface::class) }.hook {
                     after {
                         if (!userTypeface) return@after
@@ -545,6 +567,7 @@ object LockScreenChargingComponent : YukiBaseHooker() {
             //Source ChargingLevelAndLogoView
             "com.oplusos.systemui.keyguard.charginganim.siphonanim.ChargingLevelAndLogoView".toClass()
                 .resolve().apply {
+                    optional()
                     firstMethod { name = "updatePowerFormat" }.hook {
                         after {
                             if (!userTypeface) return@after
@@ -590,6 +613,7 @@ object LockScreenChargingComponent : YukiBaseHooker() {
             //Source ChargingAnimationImpl
             "com.oplusos.systemui.keyguard.charginganim.ChargingAnimationImpl".toClass().resolve()
                 .apply {
+                    optional()
                     firstMethod { name = "isMaxWattageMatchs" }.hook {
                         before {
                             if (warpCharge != "2") return@before
@@ -603,6 +627,7 @@ object LockScreenChargingComponent : YukiBaseHooker() {
             //Source ChargingLevelAndLogoViewForFlavorOneVfx
             "com.oplusos.systemui.keyguard.charginganim.siphonanim.flavorone.ChargingLevelAndLogoViewForFlavorOneVfx".toClassOrNull()
                 ?.resolve()?.apply {
+                    optional()
                     firstMethod { name = "setTypeface" }.hook {
                         after {
                             if (!userTypeface) return@after
