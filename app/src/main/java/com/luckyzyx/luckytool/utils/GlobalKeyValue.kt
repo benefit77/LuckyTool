@@ -27,4 +27,7 @@ object GlobalKeyValue {
 
     const val memcConfigPackageList = "memc_config_package_list"
     const val memcConfigActivityList = "memc_config_activity_list"
+
+    const val keyFaceBiometricFix = "enable_face_biometric_fix"
+    const val keyDisableAppJumpConfirmDialog = "disable_app_jump_confirm_dialog"
 }

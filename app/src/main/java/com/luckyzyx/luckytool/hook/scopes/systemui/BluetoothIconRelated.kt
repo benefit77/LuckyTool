@@ -25,16 +25,22 @@ object BluetoothIconRelated : YukiBaseHooker() {
             "com.oplusos.systemui.statusbar.phone.PhoneStatusBarPolicyEx", //C13
             "com.oplus.systemui.statusbar.phone.OplusPhoneStatusBarPolicyExImpl" //C14
         ).toClass().resolve().apply {
-            firstMethodOrNull { name = "updateBluetoothIcon";parameterCount = 4 }?.hook {
+            optional()
+            firstMethodOrNull {
+                name = "updateBluetoothIcon"
+                parameterCount = 4
+                superclass()
+            }?.hook {
                 before {
                     if (!isHide) return@before
                     val isBluetoothEnabled = lastArg().get<Boolean>() ?: false
                     val controller = firstField {
                         type = BluetoothController
-                        if (SDK < A14) superclass()
+                        superclass()
                     }.of(instance).get() ?: return@before
                     val isBluetoothConnected = controller.asResolver().firstMethod {
                         name = "isBluetoothConnected"
+                        superclass()
                     }.invoke<Boolean>() ?: return@before
                     lastArg().set(isBluetoothEnabled && isBluetoothConnected)
                 }
@@ -42,28 +48,44 @@ object BluetoothIconRelated : YukiBaseHooker() {
                 (firstMethodOrNull {
                     name = "updateBluetooth"
                     emptyParameters()
+                    superclass()
                 } ?: firstMethod {
                     name { it.contains("updateBluetooth") }
                     emptyParameters()
+                    superclass()
                 }).hook {
                     before {
                         if (!isHide) return@before
-                        val bluetoothController = (firstFieldOrNull { type = BluetoothController }
-                            ?: firstField { type = BluetoothController }).of(instance).get()
+                        val bluetoothController = (firstFieldOrNull {
+                            type = BluetoothController
+                            superclass()
+                        } ?: firstField {
+                            type = BluetoothController
+                            superclass()
+                        }).of(instance).get()
                             ?: return@before
-                        val statusBarIconController = firstField { type = StatusBarIconController }
+                        val statusBarIconController = firstField {
+                            type = StatusBarIconController
+                            superclass()
+                        }
                             .of(instance).get() ?: return@before
                         val slotBluetooth =
-                            firstField { name = "slotBluetooth" }.of(instance).get<String>()
+                            firstField {
+                                name = "slotBluetooth"
+                                superclass()
+                            }.of(instance).get<String>()
                         val isBluetoothEnabled = bluetoothController.asResolver().firstField {
                             name = "mEnabled"
+                            superclass()
                         }.get<Boolean>() ?: false
                         val bluetoothConnectionState = bluetoothController.asResolver().firstField {
                             name = "mConnectionState"
+                            superclass()
                         }.get<Int>()
                         if (isBluetoothEnabled && bluetoothConnectionState != 2) {
                             statusBarIconController.asResolver().firstMethod {
                                 name = "setIconVisibility"
+                                superclass()
                             }.invoke(slotBluetooth, false)
                             result = null
                         }

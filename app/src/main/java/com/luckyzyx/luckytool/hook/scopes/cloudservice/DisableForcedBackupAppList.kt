@@ -24,20 +24,30 @@ object DisableForcedBackupAppList : YukiBaseHooker() {
             ?: return
 
         //Source BackupRestoreOpt
-        "com.heytap.cloud.backuprestore.bswitch.BackupRestoreOpt".toClass().resolve().apply {
-            firstMethodOrNull { name = "getForceSelect" }?.hook {
+        "com.heytap.cloud.backuprestore.bswitch.BackupRestoreOpt".toClassOrNull()
+            ?.resolve()?.apply {
+            optional()
+            firstMethodOrNull { name = "getForceSelect"; superclass() }?.hook {
                 intercept(false)
             }
         }
 
         //Source BackupRestoreOptUiData
-        "com.heytap.cloud.backuprestore.bswitch.bean.BackupRestoreOptUiData".toClass().resolve()
-            .apply {
-                firstMethod { name = "getOptStyle" }.hook {
+        "com.heytap.cloud.backuprestore.bswitch.bean.BackupRestoreOptUiData".toClassOrNull()
+            ?.resolve()
+            ?.apply {
+                optional()
+                firstMethod { name = "getOptStyle"; superclass() }.hook {
                     before {
-                        val optId = firstField { name = "optId" }.of(instance).get<String>()
+                        val optId = firstField {
+                            name = "optId"
+                            superclass()
+                        }.of(instance).get<String>()
                         if (optId == "backup_switch_key_third_app") {
-                            val style = switchStyle.asResolver().firstMethod { name = "getStyle" }
+                            val style = switchStyle.asResolver().firstMethod {
+                                name = "getStyle"
+                                superclass()
+                            }
                                 .invoke()
                             result = style
                         }

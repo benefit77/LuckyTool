@@ -23,11 +23,15 @@ object RemoveStatusBarBottomNetworkWarn : YukiBaseHooker() {
 
             //Source OplusQSSecurityController
             "com.oplus.systemui.qs.policy.OplusQSSecurityController".toClass().resolve().apply {
-                firstMethod { name = "showDeviceMonitoringDialog" }.hook {
+                optional()
+                firstMethod { name = "showDeviceMonitoringDialog"; superclass() }.hook {
                     if (removeMode == "1" || removeMode == "2") intercept()
                 }
-                (firstMethodOrNull { name = "handleRefreshState" }
-                    ?: firstMethod { name { it.contains("handleRefreshState") } }).hook {
+                (firstMethodOrNull { name = "handleRefreshState"; superclass() }
+                    ?: firstMethod {
+                        name { it.contains("handleRefreshState") }
+                        superclass()
+                    }).hook {
                     if (removeMode == "2") intercept()
                 }
             }
@@ -45,10 +49,11 @@ object RemoveStatusBarBottomNetworkWarn : YukiBaseHooker() {
                 "com.oplusos.systemui.qs.widget.OplusQSSecurityText", //C13
                 "com.oplus.systemui.qs.widget.OplusQSSecurityText" //C14
             ).toClass().resolve().apply {
-                firstMethod { name = "handleClick" }.hook {
+                optional()
+                firstMethod { name = "handleClick"; superclass() }.hook {
                     if (removeMode == "1" || removeMode == "2") intercept()
                 }
-                firstMethod { name = "handleRefreshState" }.hook {
+                firstMethod { name = "handleRefreshState"; superclass() }.hook {
                     if (removeMode == "2") intercept()
                 }
             }

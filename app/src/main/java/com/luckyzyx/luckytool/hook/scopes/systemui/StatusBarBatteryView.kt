@@ -34,7 +34,8 @@ object StatusBarBatteryView : YukiBaseHooker() {
             //Source BatteryViewBinder
             "com.oplus.systemui.statusbar.pipeline.battery.ui.binder.BatteryViewBinder".toClass()
                 .resolve().apply {
-                    firstMethodOrNull { name = "bind\$initView" }?.hook {
+                    optional()
+                    firstMethodOrNull { name = "bind\$initView"; superclass() }?.hook {
                         after {
                             args.filterIsInstance<TextView>().forEachIndexed { _, view ->
                                 view.handBatteryTextView(
@@ -47,7 +48,7 @@ object StatusBarBatteryView : YukiBaseHooker() {
                             }
                         }
                     }
-                    firstMethodOrNull { name = "updateText" }?.hook {
+                    firstMethodOrNull { name = "updateText"; superclass() }?.hook {
                         after {
                             val view = firstArg().get<TextView>() ?: return@after
                             view.handBatteryTextView(
@@ -60,7 +61,7 @@ object StatusBarBatteryView : YukiBaseHooker() {
                         }
                     }
 
-                    firstMethodOrNull { name = "bind\$updateOldHorizontal" }?.hook {
+                    firstMethodOrNull { name = "bind\$updateOldHorizontal"; superclass() }?.hook {
                         after {
                             args.filterIsInstance<TextView>().forEachIndexed { _, view ->
                                 view.handBatteryTextView(
@@ -74,7 +75,7 @@ object StatusBarBatteryView : YukiBaseHooker() {
                         }
                     }
 
-                    firstMethodOrNull { name = "bind\$updatePercentOutView" }?.hook {
+                    firstMethodOrNull { name = "bind\$updatePercentOutView"; superclass() }?.hook {
                         after {
                             args.filterIsInstance<TextView>().forEachIndexed { _, view ->
                                 view.handBatteryTextView(
@@ -92,8 +93,9 @@ object StatusBarBatteryView : YukiBaseHooker() {
             //Source StatBatteryMeterView
             "com.oplus.systemui.statusbar.pipeline.battery.ui.view.StatBatteryMeterView".toClass()
                 .resolve().apply {
-                    (firstMethodOrNull { name = "setTextTypeface" }
-                        ?: firstMethod { name = "setFontTypeface" }).hook {
+                    optional()
+                    (firstMethodOrNull { name = "setTextTypeface"; superclass() }
+                        ?: firstMethod { name = "setFontTypeface"; superclass() }).hook {
                         if (userTypeface) intercept()
                     }
                 }

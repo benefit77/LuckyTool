@@ -16,19 +16,24 @@ object RemoveUSBConnectDialog : YukiBaseHooker() {
             "com.oplusos.systemui.notification.usb.UsbService",
             "com.oplus.systemui.usb.UsbService" //C14 C15
         ).toClass().resolve().apply {
-            (firstMethodOrNull { name = "onUsbConnected" }
-                ?: firstMethod { name { it.contains("onUsbConnected") } }).hook {
+            optional()
+            (firstMethodOrNull { name = "onUsbConnected"; superclass() }
+                ?: firstMethod {
+                    name { it.contains("onUsbConnected") }
+                    superclass()
+                }).hook {
                 before {
                     val instance = instanceOrNull ?: firstArg().get()
                     val context = lastArg().get<Context>() ?: return@before
-                    firstMethod { name = "onUsbSelect" }.of(instance).invoke(1)
-                    firstMethod { name = "updateAdbNotification" }.of(instance).invoke(context)
-                    firstMethod { name = "updateUsbNotification" }.let {
+                    firstMethod { name = "onUsbSelect"; superclass() }.of(instance).invoke(1)
+                    firstMethod { name = "updateAdbNotification"; superclass() }.of(instance)
+                        .invoke(context)
+                    firstMethod { name = "updateUsbNotification"; superclass() }.let {
                         val contextIndex = it.self.parameterTypes.indexOf(classOf<Context>())
                         if (contextIndex == 0) it.of(instance).invoke(context, 1)
                         else it.of(instance).invoke(1, context)
                     }
-                    firstMethod { name = "changeUsbConfig" }.let {
+                    firstMethod { name = "changeUsbConfig"; superclass() }.let {
                         val contextIndex = it.self.parameterTypes.indexOf(classOf<Context>())
                         if (contextIndex == 0) it.of(instance).invoke(context, 1)
                         else it.of(instance).invoke(1, context)
@@ -36,10 +41,11 @@ object RemoveUSBConnectDialog : YukiBaseHooker() {
                     result = null
                 }
             }
-            firstMethod { name = "updateUsbNotification" }.hook {
+            firstMethod { name = "updateUsbNotification"; superclass() }.hook {
                 before {
                     firstField {
                         name { it.contains("NeedShowUsbDialog", true) }
+                        superclass()
                     }.of(instance).set(false)
                 }
             }

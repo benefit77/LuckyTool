@@ -21,7 +21,7 @@ object HookBattery : YukiBaseHooker() {
         loadHooker(HookGlobalFeatureConfig)
 
         if (SDK < A13) try {
-            DexkitUtils.create(appInfo.sourceDir).close()
+            DexkitUtils.create(appInfo.sourceDir)?.close()
         } catch (_: UnsatisfiedLinkError) {
             return
         }

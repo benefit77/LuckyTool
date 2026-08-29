@@ -28,23 +28,30 @@ object FullScreenGestureSideSlideBar : YukiBaseHooker() {
             "com.oplus.systemui.navigationbar.gesture.sidegesture.SideGestureNavView", //C14 C15
             "com.oplus.systemui.navigationbar.gesture.sidegesture.view.SideGestureNavView" //C16
         ).toClass().resolve().apply {
-            firstMethod { name = "onDraw";parameterCount = 1 }.hook {
+            optional()
+            firstMethod { name = "onDraw"; parameterCount = 1; superclass() }.hook {
                 if (removeView) intercept()
             }
-            (firstMethodOrNull { name = "initPaint" } ?: firstConstructor()).hook {
+            (firstMethodOrNull { name = "initPaint"; superclass() } ?: firstConstructor()).hook {
                 after {
                     if (!removeBackground) return@after
                     firstField {
                         name { it.contains("bezierPaint", true) }
                         type = Paint::class
+                        superclass()
                     }.of(instance).get<Paint>()?.color = Color.TRANSPARENT
                 }
             }
-            firstMethod { name = "setBackIcon";parameters(Bitmap::class) }.hook {
+            firstMethod {
+                name = "setBackIcon"
+                parameters(Bitmap::class)
+                superclass()
+            }.hook {
                 before {
                     if (!isReplace) return@before
                     val type = firstField {
                         name { it.contains("position", true) }
+                        superclass()
                     }.of(instance).get<Int>()
                     val bitmap = when (type) {
                         0 -> BitmapFactory.decodeFile(leftPath)

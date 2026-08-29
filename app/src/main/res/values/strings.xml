@@ -1359,4 +1359,10 @@
     <string name="apk_details_min_sdk">Minimum SDK</string>
     <string name="apk_details_target_sdk">Target SDK</string>
     <string name="apk_details_unknown">Unavailable</string>
+
+    <string name="face_biometric_fix_enabled">Enable face biometric fix</string>
+    <string name="face_biometric_fix_summary">Treat ColorOS face sensor 4095 strength as Class 3</string>
+    <string name="disable_app_jump_confirm_dialog">Disable app jump confirmation dialog</string>
+    <string name="disable_app_jump_confirm_dialog_summary">No longer show the confirmation dialog when jumping to another app</string>
+
 </resources>

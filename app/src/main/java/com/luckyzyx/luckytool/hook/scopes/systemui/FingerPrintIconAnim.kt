@@ -51,7 +51,8 @@ object FingerPrintIconAnim : YukiBaseHooker() {
             "com.oplus.systemui.biometrics.finger.udfps.OnScreenFingerprintUiMach", //C14
             "com.oplus.systemui.biometrics.finger.udfps.OnScreenFingerprintUiMech"  //C15
         ).toClass().resolve().apply {
-            firstMethod { name = "loadAnimDrawables" }.hook {
+            optional()
+            firstMethod { name = "loadAnimDrawables"; superclass() }.hook {
                 if (removeMode == "3") intercept()
                 else after {
 //                    YLog.d(
@@ -72,13 +73,13 @@ object FingerPrintIconAnim : YukiBaseHooker() {
                 }
             }
             //C13-C15 旧版的独立 fade 方法（C16 起不存在，仅作旧版本回退兼容）
-            firstMethodOrNull { name = "startFadeInAnimation" }?.hook {
+            firstMethodOrNull { name = "startFadeInAnimation"; superclass() }?.hook {
                 if (isReplaceIcon) before {
                     instance<Any>().setCustomDrawable(iconPath, false)
                     result = null
                 } else if (removeMode == "1" || removeMode == "3") intercept()
             }
-            firstMethodOrNull { name = "startFadeOutAnimation" }?.hook {
+            firstMethodOrNull { name = "startFadeOutAnimation"; superclass() }?.hook {
                 if (isReplaceIcon) intercept()
                 else if (removeMode == "1" || removeMode == "3") intercept()
             }

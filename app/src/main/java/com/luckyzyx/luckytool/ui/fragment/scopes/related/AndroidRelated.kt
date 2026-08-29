@@ -11,6 +11,7 @@ import com.luckyzyx.luckytool.ui.activity.MainActivity
 import com.luckyzyx.luckytool.ui.fragment.base.BaseScopePreferenceFeagment
 import com.luckyzyx.luckytool.utils.A12
 import com.luckyzyx.luckytool.utils.AppUtils
+import com.luckyzyx.luckytool.utils.GlobalKeyValue
 import com.luckyzyx.luckytool.utils.ModulePrefs
 import com.luckyzyx.luckytool.utils.SDK
 import com.luckyzyx.luckytool.utils.arraySummaryLine
@@ -44,6 +45,16 @@ class AndroidRelated : BaseScopePreferenceFeagment() {
 
     override fun Context.loadPreferences(): ArrayList<Preference> {
         return ArrayList<Preference>().apply {
+            add(SwitchPreference(this@loadPreferences).apply {
+                title = getString(R.string.face_biometric_fix_enabled)
+                summary = arraySummaryLine(
+                    getString(R.string.face_biometric_fix_summary),
+                    getString(R.string.need_restart_system)
+                )
+                key = GlobalKeyValue.keyFaceBiometricFix
+                setDefaultValue(false)
+                isIconSpaceReserved = false
+            })
             add(SwitchPreference(this@loadPreferences).apply {
                 title = getString(R.string.remove_gms_usage_restrictions)
                 summary = arraySummaryLine(

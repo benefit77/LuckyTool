@@ -1183,4 +1183,8 @@
     <string name="apk_details_min_sdk">最低 SDK</string>
     <string name="apk_details_target_sdk">目标 SDK</string>
     <string name="apk_details_unknown">暂无信息</string>
+    <string name="face_biometric_fix_enabled">启用面部生物识别修复</string>
+    <string name="face_biometric_fix_summary">将 ColorOS 人脸传感器上报的 4095 强度修正为 Class 3</string>
+    <string name="disable_app_jump_confirm_dialog">关闭应用跳转确认弹框</string>
+    <string name="disable_app_jump_confirm_dialog_summary">跳转到其他应用时不再弹出确认框</string>
 </resources>

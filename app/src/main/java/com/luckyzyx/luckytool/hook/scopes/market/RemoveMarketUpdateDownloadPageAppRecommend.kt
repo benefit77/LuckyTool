@@ -21,7 +21,7 @@ class RemoveMarketUpdateDownloadPageAppRecommend(val dexKitBridge: DexKitBridge)
         val imageLoader = "com.nearme.imageloader.ImageLoader"
 
         //Source CardDataProcessor
-        dexKitBridge.findClass {
+        val appUpdateItemHolder = dexKitBridge.findClass {
             matcher {
                 addFieldForName("mDataUtil")
                 addMethod {
@@ -76,15 +76,19 @@ class RemoveMarketUpdateDownloadPageAppRecommend(val dexKitBridge: DexKitBridge)
                     }
                 }
             }
-        }.apply {
+        }
+        if (appUpdateItemHolder.isNullOrEmpty()) return@onHook
+        appUpdateItemHolder.apply {
             checkDataList("RemoveMarketUpdatePageAppRecommend APPUpdateItemHolder")
             single().name.toClass().resolve().apply {
+                optional()
                 firstMethodOrNull {
                     parameters(
                         cardDto, String::class, VagueType,
                         Map::class, Boolean::class, Long::class
                     )
                     returnType(Void.TYPE)
+                    superclass()
                 }?.hook {
                     intercept()
                 }

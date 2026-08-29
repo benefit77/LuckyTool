@@ -10,6 +10,7 @@ import com.luckyzyx.luckytool.hook.scopes.android.AllowUntrustedTouch
 import com.luckyzyx.luckytool.hook.scopes.android.AppSplashScreen
 import com.luckyzyx.luckytool.hook.scopes.android.BatteryOptimizationWhitelist
 import com.luckyzyx.luckytool.hook.scopes.android.DarkModeService
+import com.luckyzyx.luckytool.hook.scopes.android.DisableAppJumpConfirmDialog
 import com.luckyzyx.luckytool.hook.scopes.android.DisableAccessibilityWarningDialog
 import com.luckyzyx.luckytool.hook.scopes.android.DisableAudioFocus
 import com.luckyzyx.luckytool.hook.scopes.android.DisableMaliciousAppIntercept
@@ -18,6 +19,7 @@ import com.luckyzyx.luckytool.hook.scopes.android.EnableVideoMemcFrameInsertion
 import com.luckyzyx.luckytool.hook.scopes.android.ForceAllAppsSupportSplitScreen
 import com.luckyzyx.luckytool.hook.scopes.android.ForceEnable32BitSupport
 import com.luckyzyx.luckytool.hook.scopes.android.HookFloatMirageWindow
+import com.luckyzyx.luckytool.hook.scopes.android.HookFaceBiometricFix
 import com.luckyzyx.luckytool.hook.scopes.android.HookGMSRestrict
 import com.luckyzyx.luckytool.hook.scopes.android.HookIPackageManager
 import com.luckyzyx.luckytool.hook.scopes.android.HookMediaProjectionManager
@@ -38,6 +40,7 @@ import com.luckyzyx.luckytool.hook.scopes.android.SetAppUpdateDotDisplayMode
 import com.luckyzyx.luckytool.hook.scopes.android.SystemEnableVolumeKeyControlFlashlight
 import com.luckyzyx.luckytool.hook.scopes.android.ZoomWindowConfig
 import com.luckyzyx.luckytool.utils.A13
+import com.luckyzyx.luckytool.utils.GlobalKeyValue
 import com.luckyzyx.luckytool.utils.ModulePrefs
 import com.luckyzyx.luckytool.utils.SDK
 import com.luckyzyx.luckytool.utils.getOSVersionCode
@@ -53,6 +56,9 @@ object HookAndroid : YukiBaseHooker() {
         loadHooker(HookGlobalSystemProperties)
         loadHooker(HookGlobalPmsFeature)
         loadHooker(HookGlobalSystemConfig)
+
+        //ColorOS 人脸强度 4095 -> Class 3，修复 Bitwarden 等应用生物识别
+        loadHooker(HookFaceBiometricFix)
 
         //禁止App启动
 //        loadHooker(HookAppStartForbidden)
@@ -142,6 +148,16 @@ object HookAndroid : YukiBaseHooker() {
         loadHooker(HookIPackageManager())
 
         loadHooker(RemoveAlwaysAllowAppStartList)
+
+        //关闭应用跳转确认弹框
+        if (osCode >= 38 &&
+            preferences(ModulePrefs).getBoolean(
+                GlobalKeyValue.keyDisableAppJumpConfirmDialog,
+                false,
+            )
+        ) {
+            loadHooker(DisableAppJumpConfirmDialog)
+        }
 
         //禁用风险应用拦截
         if (preferences(ModulePrefs).getBoolean("disable_malicious_app_intercept", false)) {
