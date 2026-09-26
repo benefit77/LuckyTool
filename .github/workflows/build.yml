@@ -2,7 +2,11 @@ name: Build APK
 
 on:
   push:
-    branches: [main, master, libxposed]
+    # libxposed 分支暂不自动构建：上游依赖
+    # com.highcapable.yukihookapi:yukihook-{bom,core,compiler,runtime-libxposed}:1.5.0-beta.4
+    # 尚未发布到公开仓库（上游靠 mavenLocal 构建），依赖解析必然失败。
+    # 需要验证时用 workflow_dispatch 手动触发，或等上游发布后把 libxposed 加回来。
+    branches: [main, master]
     tags: ["v*"]
   pull_request:
   workflow_dispatch:
