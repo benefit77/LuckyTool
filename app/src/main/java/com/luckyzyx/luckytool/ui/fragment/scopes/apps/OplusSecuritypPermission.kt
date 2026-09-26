@@ -10,7 +10,6 @@ import com.luckyzyx.luckytool.service.UserService
 import com.luckyzyx.luckytool.ui.activity.MainActivity
 import com.luckyzyx.luckytool.ui.fragment.base.BaseScopePreferenceFeagment
 import com.luckyzyx.luckytool.utils.AppUtils
-import com.luckyzyx.luckytool.utils.GlobalKeyValue
 import com.luckyzyx.luckytool.utils.ModulePrefs
 import com.luckyzyx.luckytool.utils.arraySummaryLine
 import com.luckyzyx.luckytool.utils.dialogCentered
@@ -54,16 +53,6 @@ class OplusSecuritypPermission : BaseScopePreferenceFeagment() {
                 key = "disable_malicious_app_intercept"
                 setDefaultValue(false)
                 isVisible = osCode >= 38
-                isIconSpaceReserved = false
-            })
-            add(SwitchPreference(this@loadPreferences).apply {
-                title = getString(R.string.disable_app_jump_confirm_dialog)
-                summary = arraySummaryLine(
-                    getString(R.string.disable_app_jump_confirm_dialog_summary),
-                    getString(R.string.need_restart_system)
-                )
-                key = GlobalKeyValue.keyDisableAppJumpConfirmDialog
-                setDefaultValue(false)
                 isIconSpaceReserved = false
             })
             add(SwitchPreference(this@loadPreferences).apply {
