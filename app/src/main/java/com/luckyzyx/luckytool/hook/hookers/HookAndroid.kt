@@ -10,7 +10,6 @@ import com.luckyzyx.luckytool.hook.scopes.android.AllowUntrustedTouch
 import com.luckyzyx.luckytool.hook.scopes.android.AppSplashScreen
 import com.luckyzyx.luckytool.hook.scopes.android.BatteryOptimizationWhitelist
 import com.luckyzyx.luckytool.hook.scopes.android.DarkModeService
-import com.luckyzyx.luckytool.hook.scopes.android.DisableAppJumpConfirmDialog
 import com.luckyzyx.luckytool.hook.scopes.android.DisableAccessibilityWarningDialog
 import com.luckyzyx.luckytool.hook.scopes.android.DisableAudioFocus
 import com.luckyzyx.luckytool.hook.scopes.android.DisableMaliciousAppIntercept
@@ -40,7 +39,6 @@ import com.luckyzyx.luckytool.hook.scopes.android.SetAppUpdateDotDisplayMode
 import com.luckyzyx.luckytool.hook.scopes.android.SystemEnableVolumeKeyControlFlashlight
 import com.luckyzyx.luckytool.hook.scopes.android.ZoomWindowConfig
 import com.luckyzyx.luckytool.utils.A13
-import com.luckyzyx.luckytool.utils.GlobalKeyValue
 import com.luckyzyx.luckytool.utils.ModulePrefs
 import com.luckyzyx.luckytool.utils.SDK
 import com.luckyzyx.luckytool.utils.getOSVersionCode
@@ -148,16 +146,6 @@ object HookAndroid : YukiBaseHooker() {
         loadHooker(HookIPackageManager())
 
         loadHooker(RemoveAlwaysAllowAppStartList)
-
-        //关闭应用跳转确认弹框
-        if (osCode >= 38 &&
-            prefs(ModulePrefs).getBoolean(
-                GlobalKeyValue.keyDisableAppJumpConfirmDialog,
-                false,
-            )
-        ) {
-            loadHooker(DisableAppJumpConfirmDialog)
-        }
 
         //禁用风险应用拦截
         if (prefs(ModulePrefs).getBoolean("disable_malicious_app_intercept", false)) {
